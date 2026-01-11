@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0c0b">
+  <title>Vertical Habits</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{
+      --bg-deep:#0a0c0b;--bg-card:#121614;--bg-elevated:#1a1f1c;
+      --earth-forest:#3d6b4f;--earth-sage:#5a8a62;--earth-moss:#4a7856;
+      --accent-green:#4faa5a;--accent-teal:#3a9b8c;--accent-lime:#7ab356;
+      --recovery-color:#5a9b6a;--training-color:#4a8fd4;--performance-color:#d4a84a;
+      --text-primary:#e8f0ea;--text-secondary:rgba(232,240,234,0.65);--text-muted:rgba(232,240,234,0.4);
+      --glass-border:rgba(232,240,234,0.08);--glass-border-light:rgba(232,240,234,0.15);
+      --font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;
+      --radius-sm:10px;--radius-md:14px;--radius-lg:20px;--radius-xl:28px;
+    }
+    body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+    .mountain-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4}
+    .mountain-layer{position:absolute;bottom:0;left:0;width:100%;transition:height 2s cubic-bezier(0.4,0,0.2,1)}
+    .mountain-1{background:linear-gradient(to top,rgba(74,120,86,0.35)0%,transparent 100%);clip-path:polygon(0% 100%,20% 40%,40% 60%,60% 30%,80% 50%,100% 20%,100% 100%)}
+    .mountain-2{background:linear-gradient(to top,rgba(90,138,98,0.25)0%,transparent 100%);clip-path:polygon(0% 100%,15% 50%,35% 70%,55% 45%,75% 65%,95% 35%,100% 100%)}
+    .mountain-3{background:linear-gradient(to top,rgba(61,107,79,0.15)0%,transparent 100%);clip-path:polygon(0% 100%,10% 60%,30% 80%,50% 55%,70% 75%,90% 50%,100% 100%)}
+    .app{position:relative;z-index:1;max-width:500px;margin:0 auto;min-height:100vh;background:linear-gradient(180deg,rgba(10,12,11,0.97)0%,rgba(10,12,11,0.95)100%)}
+    .header{padding:28px 24px 24px;background:linear-gradient(180deg,var(--bg-elevated)0%,transparent 100%);border-bottom:1px solid var(--glass-border)}
+    .logo{font-family:var(--font-display);font-size:38px;font-weight:800;text-align:center;background:linear-gradient(135deg,var(--earth-sage)0%,var(--accent-green)50%,var(--accent-lime)100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:2px;margin-bottom:12px}
+    .day-info{text-align:center;font-size:14px;color:var(--text-secondary);margin-bottom:14px;font-weight:500;letter-spacing:0.5px}
+    .day-badge{display:inline-block;padding:12px 28px;border-radius:var(--radius-lg);font-size:15px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;border:2px solid}
+    .badge-r{background:rgba(90,155,106,0.15);border-color:var(--recovery-color);color:var(--recovery-color);box-shadow:0 0 20px rgba(90,155,106,0.3),inset 0 0 20px rgba(90,155,106,0.1)}
+    .badge-t{background:rgba(74,143,212,0.15);border-color:var(--training-color);color:var(--training-color);box-shadow:0 0 20px rgba(74,143,212,0.3),inset 0 0 20px rgba(74,143,212,0.1)}
+    .badge-p{background:rgba(212,168,74,0.15);border-color:var(--performance-color);color:var(--performance-color);box-shadow:0 0 20px rgba(212,168,74,0.3),inset 0 0 20px rgba(212,168,74,0.1)}
+    .content{padding:20px 20px calc(100px + env(safe-area-inset-bottom)) 20px}
+    .page{display:none}.page.active{display:block;animation:fadeIn 0.4s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .week-nav{display:flex;justify-content:center;padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-lg);margin-bottom:18px;gap:6px}
+    .days-container{display:flex;gap:6px}
+    .day-col{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:var(--radius-md);min-width:42px;cursor:pointer;transition:all 0.3s}
+    .day-col:hover{background:rgba(232,240,234,0.04)}
+    .day-col.today{background:rgba(90,138,98,0.12)}
+    .day-col.selected{background:var(--bg-elevated);border:1px solid var(--glass-border-light)}
+    .day-letter{font-size:13px;font-weight:700;color:var(--text-primary)}
+    .day-type{font-size:10px;font-weight:800;padding:4px 6px;border-radius:6px;letter-spacing:1px}
+    .day-type.r{background:rgba(90,155,106,0.2);color:var(--recovery-color)}
+    .day-type.t{background:rgba(74,143,212,0.2);color:var(--training-color)}
+    .day-type.p{background:rgba(212,168,74,0.2);color:var(--performance-color)}
+    .view-toggle{display:flex;gap:6px;margin-bottom:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:5px}
+    .view-btn{flex:1;padding:11px;background:transparent;border:none;color:var(--text-muted);font-size:13px;font-weight:600;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.3s}
+    .view-btn.active{background:var(--bg-elevated);color:var(--text-primary)}
+    .habits-list{display:grid;gap:12px}
+    .habit{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:18px;transition:all 0.3s}
+    .habit.completed{background:linear-gradient(135deg,rgba(79,170,90,0.12),rgba(79,170,90,0.04));border-color:rgba(79,170,90,0.25)}
+    .habit-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .checkbox{width:26px;height:26px;border:2px solid var(--glass-border-light);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--bg-elevated);transition:all 0.3s;flex-shrink:0}
+    .checkbox.checked{background:linear-gradient(135deg,var(--accent-green),var(--earth-forest));border-color:var(--accent-green)}
+    .checkbox svg{width:14px;height:14px;opacity:0;transition:all 0.2s;stroke:white;stroke-width:3;fill:none}
+    .checkbox.checked svg{opacity:1}
+    .habit-title{flex:1;font-weight:600;font-size:15px;color:var(--text-primary)}
+    .info-btn{width:32px;height:32px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--glass-border);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;flex-shrink:0}
+    .info-btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+    .habit-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;padding-left:38px}
+    .fab{position:fixed;bottom:100px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--earth-forest),var(--accent-green));border:none;color:white;font-size:28px;cursor:pointer;box-shadow:0 6px 24px rgba(74,120,86,0.4);display:flex;align-items:center;justify-content:center;transition:all 0.3s;z-index:50}
+    .fab svg{width:24px;height:24px;stroke:white;stroke-width:2.5}
+    .card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px}
+    .card-title{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:18px;color:var(--text-primary)}
+    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--glass-border)}
+    .stat-row:last-child{border-bottom:none;padding-bottom:0}
+    .stat-row:first-of-type{padding-top:0}
+    .stat-label{font-size:14px;color:var(--text-secondary);font-weight:500}
+    .stat-value{font-size:18px;font-weight:700;color:var(--accent-green)}
+    .input-group{margin-bottom:16px}
+    .input-label{display:block;font-size:12px;font-weight:600;margin-bottom:7px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px}
+    .input{width:100%;padding:14px 16px;background:var(--bg-elevated);border:1px solid var(--glass-border);border-radius:var(--radius-md);color:var(--text-primary);font-family:var(--font-body);font-size:15px;transition:all 0.3s}
+    .input:focus{outline:none;border-color:var(--earth-forest);box-shadow:0 0 0 3px rgba(61,107,79,0.2)}
+    select.input{cursor:pointer}select.input option{background:var(--bg-card);color:var(--text-primary)}
+    textarea.input{min-height:90px;resize:vertical}
+    .btn{padding:14px 24px;border-radius:var(--radius-md);border:none;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-primary{background:linear-gradient(135deg,var(--earth-forest),var(--accent-green));color:white;box-shadow:0 4px 16px rgba(61,107,79,0.35)}
+    .btn-secondary{background:var(--bg-elevated);border:1px solid var(--glass-border);color:var(--text-primary)}
+    .btn-danger{background:rgba(160,80,80,0.15);border:1px solid rgba(160,80,80,0.3);color:#c89090}
+    .btn-skip{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);padding:12px 20px}
+    .timer-display{text-align:center;padding:28px 20px}
+    .timer-time{font-family:var(--font-display);font-size:64px;font-weight:700;margin-bottom:20px;letter-spacing:3px;background:linear-gradient(135deg,var(--text-primary),var(--accent-green));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .timer-controls{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+    .timer-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+    .interval-timer{margin-top:24px;padding-top:24px;border-top:1px solid var(--glass-border)}
+    .session{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px}
+    .session-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .session-date{font-weight:600;font-size:15px}
+    .session-grade{padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;background:rgba(61,107,79,0.2);border:1px solid var(--earth-forest);color:var(--accent-green)}
+    .session-details{font-size:13px;color:var(--text-secondary);line-height:1.6}
+    .settings-section{margin-bottom:32px}
+    .settings-title{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:16px;color:var(--text-primary)}
+    .setting-item{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:16px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    .setting-label{font-size:14px;font-weight:500}
+    .toggle{width:50px;height:28px;background:var(--bg-elevated);border-radius:14px;position:relative;cursor:pointer;transition:background 0.3s;border:1px solid var(--glass-border)}
+    .toggle.on{background:linear-gradient(135deg,var(--accent-green),var(--earth-forest));border-color:var(--accent-green)}
+    .toggle-thumb{width:22px;height:22px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform 0.3s}
+    .toggle.on .toggle-thumb{transform:translateX(22px)}
+    .nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));max-width:500px;width:calc(100% - 32px);display:flex;gap:6px;z-index:2147483647;padding:8px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+    #bottomNav{display:none}
+    .nav-item{flex:1;display:flex;align-items:center;justify-content:center;padding:16px 12px;border-radius:var(--radius-lg);background:transparent;border:none;color:var(--text-muted);cursor:pointer;transition:all 0.3s;font-family:var(--font-body);font-size:14px;font-weight:600}
+    .nav-item.active{color:var(--text-primary);background:var(--bg-elevated)}
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+    .modal.show{display:flex}
+    .modal-content{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:28px 24px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;transform:scale(0.9);transition:transform 0.3s}
+    .modal.show .modal-content{transform:scale(1)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .modal-title{font-family:var(--font-display);font-size:22px;font-weight:700}
+    .modal-close{width:36px;height:36px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--glass-border);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+    .modal-close svg{width:18px;height:18px;stroke:currentColor;stroke-width:2}
+    .library-category{margin-bottom:20px}
+    .library-category-title{font-size:13px;font-weight:700;color:var(--accent-green);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--glass-border)}
+    .library-habit{background:var(--bg-elevated);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;transition:all 0.3s}
+    .library-habit.in-routine{border-color:var(--accent-green);background:rgba(79,170,90,0.08)}
+    .library-habit-name{font-size:13px;font-weight:500;flex:1}
+    .library-habit-status{font-size:10px;padding:3px 8px;border-radius:12px;font-weight:600;margin-right:8px}
+    .library-habit-status.active{background:rgba(79,170,90,0.2);color:var(--accent-green)}
+    .library-habit-status.inactive{background:var(--bg-card);color:var(--text-muted)}
+    .library-habit-btn{padding:6px 12px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;border:none;cursor:pointer;transition:all 0.3s}
+    .library-habit-btn.add{background:linear-gradient(135deg,var(--earth-forest),var(--accent-green));color:white}
+    .library-habit-btn.remove{background:rgba(160,80,80,0.2);color:#c89090}
+    .profile-header{text-align:center;padding:28px 20px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-lg);margin-bottom:20px}
+    .profile-name{font-family:var(--font-display);font-size:26px;font-weight:700;margin-bottom:6px}
+    .profile-level{font-size:13px;color:var(--accent-green);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+    .onboarding,.daily-checkin{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-deep);z-index:10000;display:none;flex-direction:column;overflow-y:auto}
+    .onboarding.show,.daily-checkin.show{display:flex}
+    .onboarding-content{flex:1;padding:40px 24px;max-width:500px;margin:0 auto;width:100%}
+    .onboarding-title{font-family:var(--font-display);font-size:28px;font-weight:800;text-align:center;margin-bottom:10px;background:linear-gradient(135deg,var(--earth-sage),var(--accent-green));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .onboarding-subtitle{text-align:center;font-size:15px;color:var(--text-secondary);margin-bottom:28px;line-height:1.5}
+    .progress{display:flex;gap:5px;margin-bottom:28px;justify-content:center}
+    .progress-dot{width:8px;height:8px;border-radius:50%;background:var(--bg-elevated);transition:all 0.3s}
+    .progress-dot.active{background:var(--accent-green);width:20px;border-radius:4px}
+    .onboarding-nav{display:flex;gap:12px;margin-top:28px}
+    .onboarding-nav .btn{flex:1}
+    .quick-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
+    .quick-option{background:var(--bg-card);border:2px solid var(--glass-border);border-radius:var(--radius-md);padding:20px 14px;cursor:pointer;transition:all 0.3s;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .quick-option:hover{background:var(--bg-elevated)}
+    .quick-option.selected{border-color:var(--accent-green);background:rgba(79,170,90,0.1)}
+    .quick-option-icon{width:36px;height:36px;margin-bottom:10px;display:flex;align-items:center;justify-content:center}
+    .quick-option-icon svg{width:32px;height:32px;stroke:var(--accent-green);stroke-width:1.5;fill:none}
+    .quick-option-label{font-size:13px;font-weight:600}
+    .survey-options{display:grid;gap:10px;margin-top:16px}
+    .survey-option{background:var(--bg-card);border:2px solid var(--glass-border);border-radius:var(--radius-md);padding:16px;cursor:pointer;transition:all 0.3s;text-align:center}
+    .survey-option.selected{border-color:var(--accent-green);background:rgba(79,170,90,0.1)}
+    .survey-option-title{font-size:15px;font-weight:600;margin-bottom:3px}
+    .survey-option-desc{font-size:12px;color:var(--text-secondary)}
+    .quote-card{background:linear-gradient(135deg,rgba(61,107,79,0.15),rgba(79,170,90,0.08));border:1px solid var(--earth-forest);border-radius:var(--radius-lg);padding:24px;margin:24px 0;text-align:center}
+    .quote-text{font-size:16px;font-style:italic;color:var(--text-primary);line-height:1.6;margin-bottom:12px}
+    .quote-author{font-size:13px;color:var(--accent-green);font-weight:600}
+    .loading{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-deep);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:1;transition:opacity 0.6s}
+    .loading.hide{opacity:0;pointer-events:none}
+    .loading-content{text-align:center;max-width:360px;padding:40px}
+    .loading-logo{font-family:var(--font-display);font-size:clamp(32px,8vw,44px);font-weight:800;background:linear-gradient(135deg,var(--earth-sage),var(--accent-green));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:16px;letter-spacing:2px}
+    .loading-subtitle{font-size:14px;color:var(--text-secondary);margin-bottom:40px;line-height:1.5}
+    .loading-bar-container{width:100%;height:3px;background:var(--bg-elevated);border-radius:3px;overflow:hidden}
+    .loading-bar{width:0%;height:100%;background:linear-gradient(90deg,var(--earth-sage),var(--accent-green));border-radius:3px;animation:loadProgress 1.2s ease-out forwards}
+    @keyframes loadProgress{0%{width:0%}100%{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="loading-content">
+      <div class="loading-logo">VERTICAL HABITS</div>
+      <div class="loading-subtitle">Track stress on the body, not dates on the calendar</div>
+      <div class="loading-bar-container"><div class="loading-bar"></div></div>
+    </div>
+  </div>
+  <div class="mountain-bg" id="mountainBg">
+    <div class="mountain-layer mountain-1" id="m1"></div>
+    <div class="mountain-layer mountain-2" id="m2"></div>
+    <div class="mountain-layer mountain-3" id="m3"></div>
+  </div>
+  <div class="daily-checkin" id="dailyCheckin"></div>
+  <div class="onboarding" id="onboarding"></div>
+  <div class="app" id="app" style="display:none">
+    <div class="header" id="header">
+      <div class="logo">VERTICAL HABITS</div>
+      <div class="day-info"><span id="dayNum">Day 1</span> · <span id="date"></span></div>
+      <div style="text-align:center"><span class="day-badge" id="dayBadge">RECOVERY</span></div>
+    </div>
+    <div class="content" id="mainContent">
+      <div class="page active" id="habitsPage">
+        <div class="week-nav"><div class="days-container" id="daysContainer"></div></div>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="normal">Normal</button>
+          <button class="view-btn" data-view="tiny">Compact</button>
+        </div>
+        <div class="habits-list" id="habitsList"></div>
+        <button class="fab" id="addHabit"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      </div>
+      <div class="page" id="sessionsPage">
+        <div class="card">
+          <div class="card-title">Training Timer</div>
+          <div class="timer-display">
+            <div class="timer-time" id="timerTime">00:30</div>
+            <div class="timer-inputs">
+              <div class="input-group"><label class="input-label">Duration (sec)</label><input type="number" class="input" id="timerDuration" value="30"></div>
+              <div class="input-group"><label class="input-label">Delay (sec)</label><input type="number" class="input" id="timerDelay" value="5"></div>
+            </div>
+            <div class="timer-controls">
+              <button class="btn btn-primary" id="timerStart">Start</button>
+              <button class="btn btn-danger" id="timerReset">Reset</button>
+            </div>
+          </div>
+          <div class="interval-timer">
+            <div class="card-title" style="font-size:16px">Interval Timer</div>
+            <div class="timer-inputs">
+              <div class="input-group"><label class="input-label">Work (sec)</label><input type="number" class="input" id="workSec" value="40"></div>
+              <div class="input-group"><label class="input-label">Rest (sec)</label><input type="number" class="input" id="restSec" value="20"></div>
+              <div class="input-group"><label class="input-label">Sets</label><input type="number" class="input" id="sets" value="8"></div>
+              <div class="input-group"><label class="input-label">Rounds</label><input type="number" class="input" id="rounds" value="1"></div>
+              <div class="input-group" style="grid-column:span 2"><label class="input-label">Start Delay (sec)</label><input type="number" class="input" id="intervalDelay" value="5"></div>
+            </div>
+            <button class="btn btn-primary" id="startInterval" style="width:100%">Start Interval</button>
+            <div class="setting-item" style="margin-top:14px;background:transparent;padding:0;border:none">
+              <span class="setting-label">Sound</span>
+              <div class="toggle on" id="soundToggle"><div class="toggle-thumb"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Log Session</div>
+          <div class="input-group"><label class="input-label">Discipline</label>
+            <select class="input" id="discipline"><option>Bouldering</option><option>Sport Climbing</option><option>Trad Climbing</option><option>Training</option></select>
+          </div>
+          <div class="input-group"><label class="input-label">Top Grade</label><input type="text" class="input" id="grade" placeholder="V4 / 5.11a"></div>
+          <div class="input-group"><label class="input-label">Duration (min)</label><input type="number" class="input" id="duration" placeholder="90"></div>
+          <div class="input-group"><label class="input-label">Notes</label><textarea class="input" id="notes" placeholder="How did it go?"></textarea></div>
+          <button class="btn btn-primary" id="saveSession" style="width:100%">Save Session</button>
+        </div>
+        <div class="card-title" style="margin:24px 0 16px;font-family:var(--font-display);font-size:18px">Recent Sessions</div>
+        <div id="sessionsList"></div>
+      </div>
+      <div class="page" id="profilePage">
+        <div class="profile-header">
+          <div class="profile-name" id="profileName">Climber</div>
+          <div class="profile-level" id="profileLevel">Intermediate</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Stats</div>
+          <div class="stat-row"><span class="stat-label">Total Days</span><span class="stat-value" id="totalDays">1</span></div>
+          <div class="stat-row"><span class="stat-label">Current Streak</span><span class="stat-value" id="currentStreak">0 days</span></div>
+          <div class="stat-row"><span class="stat-label">Best Streak</span><span class="stat-value" id="bestStreak">0 days</span></div>
+          <div class="stat-row"><span class="stat-label">Sessions Logged</span><span class="stat-value" id="totalSessions">0</span></div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-title">Your Profile</div>
+          <div class="input-group"><label class="input-label">Name</label><input type="text" class="input" id="profileNameInput" onchange="updateProfile('name',this.value)"></div>
+          <div class="input-group"><label class="input-label">Climbing Level</label>
+            <select class="input" id="profileLevelSelect" onchange="updateProfile('level',this.value)">
+              <option value="beginner">Beginner (V0-2 / 5.9-5.10)</option>
+              <option value="intermediate">Intermediate (V3-5 / 5.11-5.12a)</option>
+              <option value="advanced">Advanced (V6-8 / 5.12b-5.13a)</option>
+              <option value="elite">Elite (V9+ / 5.13b+)</option>
+            </select>
+          </div>
+          <div class="input-group"><label class="input-label">Primary Discipline</label>
+            <select class="input" id="profileDiscipline" onchange="updateProfile('discipline',this.value)">
+              <option value="boulder">Bouldering</option><option value="sport">Sport Climbing</option><option value="trad">Trad Climbing</option><option value="multi">Multi-pitch</option>
+            </select>
+          </div>
+          <div class="input-group"><label class="input-label">Primary Goal</label>
+            <select class="input" id="profileGoal" onchange="updateProfile('goal',this.value)">
+              <option value="strength">Build Strength</option><option value="endurance">Improve Endurance</option><option value="technique">Refine Technique</option><option value="project">Send Project</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" id="viewLibrary" style="width:100%;margin-top:10px">Habits Library</button>
+        </div>
+        <div class="settings-section">
+          <div class="settings-title">Settings</div>
+          <div class="setting-item"><span class="setting-label">Show Mountain</span><div class="toggle on" id="mountainToggle"><div class="toggle-thumb"></div></div></div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-title">Data</div>
+          <button class="btn btn-secondary" id="exportBtn" style="width:100%;margin-bottom:10px">Export Data</button>
+          <button class="btn btn-secondary" id="importBtn" style="width:100%;margin-bottom:10px">Import Data</button>
+          <button class="btn btn-danger" id="resetBtn" style="width:100%">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav" id="bottomNav">
+    <button class="nav-item active" data-page="habits">Habits</button>
+    <button class="nav-item" data-page="sessions">Sessions</button>
+    <button class="nav-item" data-page="profile">Profile</button>
+  </div>
+  <div class="modal" id="modal"></div>
+<script>
+const QUOTES=[
+{text:"Small daily improvements over time lead to stunning results.",author:"Robin Sharma"},{text:"We are what we repeatedly do. Excellence is not an act, but a habit.",author:"Aristotle"},{text:"The secret of getting ahead is getting started.",author:"Mark Twain"},{text:"It's not about being the best. It's about being better than you were yesterday.",author:"Anonymous"},{text:"Success is the sum of small efforts repeated day in and day out.",author:"Robert Collier"},{text:"The only way to do great work is to love what you do.",author:"Steve Jobs"},{text:"Fall down seven times, stand up eight.",author:"Japanese Proverb"},{text:"The best climber is the one having the most fun.",author:"Alex Lowe"},{text:"Going to the mountains is like going home.",author:"John Muir"},{text:"The mountains are calling and I must go.",author:"John Muir"},{text:"Climb the mountain not to plant your flag, but to embrace the challenge.",author:"David McCullough Jr."},{text:"It's always further than it looks. It's always taller than it looks. And it's always harder than it looks.",author:"Reinhold Messner"},{text:"The best view comes after the hardest climb.",author:"Anonymous"},{text:"Train hard, climb easy.",author:"Wolfgang Güllich"},{text:"One percent better every day.",author:"James Clear"},{text:"You do not rise to the level of your goals. You fall to the level of your systems.",author:"James Clear"},{text:"Every action you take is a vote for the type of person you wish to become.",author:"James Clear"},{text:"The obstacle is the way.",author:"Marcus Aurelius"},{text:"Discipline equals freedom.",author:"Jocko Willink"},{text:"The pain you feel today will be the strength you feel tomorrow.",author:"Anonymous"}];
+const ICONS={muscle:'<svg viewBox="0 0 24 24"><path d="M7 4v4l-3 3 3 3v6h4l3-3 3 3h4v-6l3-3-3-3V4h-4l-3 3-3-3H7z"/></svg>',thumbsUp:'<svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',moon:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',alert:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',mountain:'<svg viewBox="0 0 24 24"><path d="M8 3l4 8 5-5 5 15H2L8 3z"/></svg>',dumbbell:'<svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M5 8v8M19 8v8"/></svg>',sofa:'<svg viewBox="0 0 24 24"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2"/><path d="M20 18v2"/></svg>',walking:'<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M10 22l3-8-4-1-1-5 5-1 4 8"/></svg>',building:'<svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg>',tree:'<svg viewBox="0 0 24 24"><path d="M12 22v-7l-2-2"/><path d="M17 8v.8A6 6 0 0 1 13.8 20v0H10v0A6.5 6.5 0 0 1 7 8h0a5 5 0 0 1 10 0Z"/></svg>',home:'<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',check:'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',x:'<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'};
+const CORE_HABITS={alwaysOn:[{id:'hydration',category:'always',pillar:'recovery',title:'Hydration Check',tiny:'Fill water bottle',desc:'Stay hydrated throughout the day',what:'Hydration habits',why:'Supports performance + recovery',how:'Fill bottle early, sip consistently',safety:'Spread intake through the day',equipment:[]},{id:'sleep',category:'always',pillar:'recovery',title:'Sleep 7-9h',tiny:'Set bedtime alarm',desc:'Prioritize quality sleep',what:'Sleep target',why:'Most recovery happens here',how:'Same bedtime/wake time',safety:'If sleep is low, reduce intensity',equipment:[]},{id:'fingers',category:'always',pillar:'recovery',title:'Finger Care',tiny:'2 min finger massage',desc:'Daily tendon maintenance',what:'Light tendon/skin care',why:'Prevents overuse issues',how:'Gentle flexor massage + skin check',safety:'No aggressive stretching',equipment:[]}],recovery:[{id:'mobility10',category:'recovery',pillar:'recovery',title:'10-min Mobility',tiny:'Hip + shoulder openers',desc:'Daily joint prep',what:'Short mobility flow',why:'Move better, reduce strain',how:'Hips, t-spine, shoulders',safety:'Pain-free range only',equipment:[]},{id:'yoga',category:'recovery',pillar:'recovery',title:'Yoga (Restorative)',tiny:'5 min breathing',desc:'Restore and downshift',what:'Gentle yoga',why:'Active recovery + stress reduction',how:'Slow holds, nasal breathing',safety:'Not a workout',equipment:[]},{id:'foam',category:'recovery',pillar:'recovery',title:'Foam Rolling',tiny:'Roll calves + back',desc:'Myofascial release',what:'10-20 min rolling',why:'Reduce tightness',how:'Slow passes, pause on hot spots',safety:'Avoid joints/bones',equipment:['foam']},{id:'walk',category:'recovery',pillar:'recovery',title:'Zone 2 Walk',tiny:'10 min easy walk',desc:'Easy aerobic recovery',what:'Easy walk/bike',why:'Boost circulation',how:'Conversational pace',safety:'Keep it easy',equipment:[]},{id:'shoulder_pre',category:'recovery',pillar:'recovery',title:'Shoulder Prehab',tiny:'Band external rotations',desc:'Rotator cuff + scap control',what:'Cuff/scap routine',why:'Healthy shoulders',how:'ERs, YTWs, scap pushups',safety:'Light resistance',equipment:['bands']},{id:'elbow_pre',category:'recovery',pillar:'recovery',title:'Elbow Tendon Care',tiny:'Wrist extensor eccentrics',desc:'Forearm balance work',what:'Eccentrics + soft tissue',why:'Reduce elbow flareups',how:'Slow eccentrics 8-12 reps',safety:'Stop if sharp pain',equipment:[]},{id:'core_easy',category:'recovery',pillar:'recovery',title:'Easy Core',tiny:'2 sets dead-bugs',desc:'Trunk stability',what:'Low-fatigue core',why:'Better body tension',how:'Dead-bugs, side plank',safety:'Quality over intensity',equipment:[]},{id:'breath',category:'recovery',pillar:'recovery',title:'Breathing Reset',tiny:'Box breathing 2 min',desc:'Downshift nervous system',what:'Breath practice',why:'Better sleep + recovery',how:'4-4-4-4 box breathing',safety:'Stop if dizzy',equipment:[]}],training:[{id:'maxhang',category:'training',pillar:'strength',title:'Max Hangs',tiny:'2 quality hangs',desc:'Finger strength training',what:'7-10s near-max hangs',why:'Build max finger force',how:'Warm up 20+ min, 3-6 sets',safety:'Critical warmup required',equipment:['hangboard'],goals:['strength']},{id:'repeaters',category:'training',pillar:'endurance',title:'Repeaters',tiny:'1 mini set',desc:'Forearm endurance',what:'Short hangs on/off',why:'Sustained grip capacity',how:'Safe edge, controlled form',safety:'Avoid if fingers sore',equipment:['hangboard'],goals:['endurance']},{id:'limit',category:'training',pillar:'strength',title:'Limit Bouldering',tiny:'3 hard attempts',desc:'Max difficulty work',what:'Near-max problems',why:'Power + recruitment',how:'Long rests, few tries',safety:'Be fresh, highest risk',equipment:['wall'],goals:['strength','project']},{id:'campus',category:'training',pillar:'strength',title:'Campus Board',tiny:'3 ladder sets',desc:'Contact strength',what:'Controlled ladders',why:'Power development',how:'Big rungs, strict form',safety:'Skip if any finger pain',equipment:['campus'],goals:['strength']},{id:'weighted_pull',category:'training',pillar:'strength',title:'Weighted Pulls',tiny:'2 sets of 5',desc:'Pull strength',what:'Weighted pull-ups',why:'More force in steep',how:'Full ROM, long rests',safety:'Protect shoulders',equipment:['weights'],goals:['strength']},{id:'core_hard',category:'training',pillar:'strength',title:'Hard Core',tiny:'Hollow rocks',desc:'Body tension',what:'Hollow / L-sit',why:'Steep terrain tension',how:'3-5 short sets',safety:'No low-back pain',equipment:[],goals:['strength']},{id:'antagonists',category:'training',pillar:'strength',title:'Antagonist Circuit',tiny:'Push + rotators',desc:'Balance the shoulders',what:'Push + rotator work',why:'Injury prevention',how:'Pushups, face pulls',safety:'Light/moderate load',equipment:['bands'],goals:['strength','endurance']},{id:'arc',category:'training',pillar:'endurance',title:'ARC Training',tiny:'10 min traversing',desc:'Aerobic capacity',what:'30-45 min easy',why:'Base endurance',how:'Stay below pump',safety:'Keep it easy',equipment:['wall'],goals:['endurance']},{id:'4x4',category:'training',pillar:'endurance',title:'4x4s',tiny:'2 problems x 2',desc:'Power endurance',what:'Repeated boulders',why:'Fight through pump',how:'Sustainable grade',safety:'Stop before collapse',equipment:['wall'],goals:['endurance','project']},{id:'silent_feet',category:'training',pillar:'technique',title:'Silent Feet',tiny:'10 silent steps',desc:'Foot precision',what:'Quiet feet',why:'Efficiency + control',how:'Climb easy, listen',safety:'Stay low intensity',equipment:['wall'],goals:['technique']},{id:'hip_drills',category:'training',pillar:'technique',title:'Hip Movement Drills',tiny:'3 hip turns',desc:'Better positioning',what:'Drop-knees/flags',why:'Save energy',how:'Easy terrain, exaggerate',safety:'Avoid knee torque',equipment:['wall'],goals:['technique']}],performance:[{id:'project',category:'performance',pillar:'project',title:'Project Attempts',tiny:'2 focused burns',desc:'Work your project',what:'High-quality attempts',why:'Apply fitness',how:'Full warmup, long rests',safety:'Stop if sloppy',equipment:['wall'],goals:['project']},{id:'beta',category:'performance',pillar:'project',title:'Beta Session',tiny:'Practice crux',desc:'Solve the puzzle',what:'Refine sequences',why:'Efficiency = sends',how:'Film, chalk marks',safety:'Dont force tweaks',equipment:['wall'],goals:['project','technique']},{id:'warmup',category:'performance',pillar:'project',title:'Full Warmup',tiny:'10 min easy climbing',desc:'Prepare tissues',what:'Progressive warmup',why:'Reduce injury risk',how:'Easy -> moderate -> hard',safety:'Never skip',equipment:['wall'],goals:['project']},{id:'tactics',category:'performance',pillar:'project',title:'Send Tactics',tiny:'Plan rests + clips',desc:'Performance execution',what:'Rest plan + pacing',why:'Use energy wisely',how:'Identify shakes',safety:'Know your limits',equipment:[],goals:['project']}]};
+let state={day:1,startDate:new Date().toISOString().split('T')[0],onboarding:false,userData:{},activeHabitIds:[],completed:{},sessions:[],viewMode:'normal',currentDayType:'r',dayTypes:{},timerSec:30,timerInterval:null,timerRunning:false,soundEnabled:true,showMountain:true,selectedDate:null,lastCheckinDate:null,todayContext:{}};
+let audioCtx=null;
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
+function beep(freq,dur){if(!state.soundEnabled||!audioCtx)return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.connect(gain);gain.connect(audioCtx.destination);osc.frequency.value=freq;osc.type='sine';gain.gain.setValueAtTime(0.3,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+dur);osc.start(audioCtx.currentTime);osc.stop(audioCtx.currentTime+dur)}
+function doubleBeep(){beep(800,0.1);setTimeout(()=>beep(800,0.1),150)}
+function tripleBeep(){beep(1000,0.15);setTimeout(()=>beep(1000,0.15),200);setTimeout(()=>beep(1000,0.15),400)}
+const SURVEY=[{q:'What is your name?',type:'text',key:'name',placeholder:'Your name'},{q:'Climbing level?',type:'single',key:'level',options:[{val:'beginner',label:'Beginner',desc:'V0-2 / 5.9-5.10'},{val:'intermediate',label:'Intermediate',desc:'V3-5 / 5.11-5.12a'},{val:'advanced',label:'Advanced',desc:'V6-8 / 5.12b-5.13a'},{val:'elite',label:'Elite',desc:'V9+ / 5.13b+'}]},{q:'Primary discipline?',type:'single',key:'discipline',options:[{val:'boulder',label:'Bouldering'},{val:'sport',label:'Sport Climbing'},{val:'trad',label:'Trad Climbing'},{val:'multi',label:'Multi-pitch'}]},{q:'Primary goal?',type:'single',key:'goal',options:[{val:'strength',label:'Build Strength'},{val:'endurance',label:'Improve Endurance'},{val:'technique',label:'Refine Technique'},{val:'project',label:'Send Project'}]},{q:'Available equipment?',type:'multiple',key:'equipment',options:[{val:'hangboard',label:'Hangboard'},{val:'weights',label:'Weights'},{val:'campus',label:'Campus Board'},{val:'bands',label:'Resistance Bands'},{val:'foam',label:'Foam Roller'},{val:'wall',label:'Climbing Wall'}]}];
+function init(){document.getElementById('bottomNav').style.display='none';const saved=localStorage.getItem('verticalHabitsData');if(saved)try{state={...state,...JSON.parse(saved)}}catch(e){}if(!state.activeHabitIds||!state.activeHabitIds.length)generateHabitsFromProfile();if(state.startDate){const diff=Math.floor((new Date()-new Date(state.startDate))/86400000);state.day=Math.max(1,diff+1)}const today=new Date().toISOString().split('T')[0];if(!state.selectedDate)state.selectedDate=today;if(!state.dayTypes[today])state.dayTypes[today]=['r','t','t','r','p','t','r'][new Date(today).getDay()];state.currentDayType=state.dayTypes[today];try{updateMountain()}catch(e){}initAudio();setTimeout(()=>{document.getElementById('loading').classList.add('hide');if(!state.onboarding)showOnboarding();else{const today=new Date().toISOString().split('T')[0];if(state.lastCheckinDate!==today)showDailyCheckin();else showApp()}},1500)}
+function showApp(){document.getElementById('bottomNav').style.display='flex';document.getElementById('app').style.display='block';initMain()}
+function initMain(){updateHeader();renderWeekNav();renderHabitsForDay();renderSessions();updateStats();updateProfilePage();attachListeners()}
+function updateHeader(){const sel=state.selectedDate||new Date().toISOString().split('T')[0];const selDateObj=new Date(sel+'T00:00:00');if(state.startDate)state.day=Math.max(1,Math.floor((selDateObj-new Date(state.startDate+'T00:00:00'))/86400000)+1);document.getElementById('dayNum').textContent='Day '+state.day;document.getElementById('date').textContent=selDateObj.toLocaleDateString('en-US',{month:'short',day:'numeric'});if(!state.dayTypes[sel])state.dayTypes[sel]=['r','t','t','r','p','t','r'][selDateObj.getDay()];state.currentDayType=state.dayTypes[sel];const labels={r:'RECOVERY',t:'TRAINING',p:'PERFORMANCE'};const badge=document.getElementById('dayBadge');badge.textContent=labels[state.currentDayType];badge.className='day-badge badge-'+state.currentDayType;badge.onclick=changeDayType}
+function changeDayType(){const types=['r','t','p'];state.currentDayType=types[(types.indexOf(state.currentDayType)+1)%3];state.dayTypes[state.selectedDate||new Date().toISOString().split('T')[0]]=state.currentDayType;save();updateHeader();renderWeekNav();renderHabitsForDay()}
+function renderWeekNav(){const container=document.getElementById('daysContainer');const letters=['S','M','T','W','T','F','S'];const todayObj=new Date(),todayStr=todayObj.toISOString().split('T')[0];const sel=state.selectedDate||todayStr;container.innerHTML='';for(let i=0;i<7;i++){const d=new Date(todayObj);d.setDate(d.getDate()-todayObj.getDay()+i);const dateStr=d.toISOString().split('T')[0];if(!state.dayTypes[dateStr])state.dayTypes[dateStr]=['r','t','t','r','p','t','r'][d.getDay()];const dayType=state.dayTypes[dateStr];const div=document.createElement('div');div.className='day-col'+(dateStr===todayStr?' today':'')+(dateStr===sel?' selected':'');div.onclick=()=>selectDay(dateStr);div.innerHTML='<div class="day-letter">'+letters[i]+'</div><div class="day-type '+dayType+'">'+dayType.toUpperCase()+'</div>';container.appendChild(div)}}
+function selectDay(dateStr){state.selectedDate=dateStr;if(!state.dayTypes[dateStr])state.dayTypes[dateStr]=['r','t','t','r','p','t','r'][new Date(dateStr+'T00:00:00').getDay()];state.currentDayType=state.dayTypes[dateStr];save();updateHeader();renderWeekNav();renderHabitsForDay()}
+function generateHabitsFromProfile(){const goal=state.userData?.goal||'strength';const equip=state.userData?.equipment||['hangboard','wall'];const allHabits=[...CORE_HABITS.alwaysOn,...CORE_HABITS.recovery,...CORE_HABITS.training,...CORE_HABITS.performance];state.activeHabitIds=CORE_HABITS.alwaysOn.map(h=>h.id);allHabits.forEach(h=>{if(h.category==='always')return;if(state.activeHabitIds.includes(h.id))return;const hasEquip=!h.equipment?.length||h.equipment.some(e=>equip.includes(e));const matchesGoal=!h.goals?.length||h.goals.includes(goal);if(hasEquip&&matchesGoal)state.activeHabitIds.push(h.id)});save()}
+function getFilteredHabitsForDay(){const dateStr=state.selectedDate||new Date().toISOString().split('T')[0];const dayType=state.dayTypes[dateStr]||'r';const level=state.userData?.level||'intermediate';const goal=state.userData?.goal||'strength';const todayEquip=state.todayContext?.equipment||state.userData?.equipment||[];const allHabits=[...CORE_HABITS.alwaysOn,...CORE_HABITS.recovery,...CORE_HABITS.training,...CORE_HABITS.performance];const activeHabits=allHabits.filter(h=>state.activeHabitIds.includes(h.id));const always=activeHabits.filter(h=>h.category==='always');const recovery=activeHabits.filter(h=>h.category==='recovery'&&(!h.equipment?.length||h.equipment.some(e=>todayEquip.includes(e))));const training=activeHabits.filter(h=>h.category==='training'&&(!h.equipment?.length||h.equipment.some(e=>todayEquip.includes(e))));const performance=activeHabits.filter(h=>h.category==='performance'&&(!h.equipment?.length||h.equipment.some(e=>todayEquip.includes(e))));const counts={beginner:3,intermediate:5,advanced:7,elite:9};const base=counts[level]||5;const target=dayType==='t'?base:dayType==='p'?base-1:base-2;const need=Math.max(0,target-always.length);const mix=dayType==='r'?{recovery:0.8,training:0.2,performance:0}:dayType==='t'?{recovery:0.25,training:0.75,performance:0}:{recovery:0.2,training:0.2,performance:0.6};const alloc={recovery:Math.round(mix.recovery*need),training:Math.round(mix.training*need),performance:Math.round(mix.performance*need)};const picked=[...always];function pickFrom(pool,n){const goalMatched=pool.filter(h=>h.goals?.includes(goal)&&!picked.find(p=>p.id===h.id));const others=pool.filter(h=>!h.goals?.includes(goal)&&!picked.find(p=>p.id===h.id));const sorted=[...goalMatched,...others];for(let i=0;i<n&&sorted.length;i++){const idx=Math.floor(Math.random()*Math.min(3,sorted.length));picked.push(sorted.splice(idx,1)[0])}}
+pickFrom(recovery,alloc.recovery);pickFrom(training,alloc.training);pickFrom(performance,alloc.performance);return picked}
+function renderHabitsForDay(){const habits=getFilteredHabitsForDay();const dateStr=state.selectedDate||new Date().toISOString().split('T')[0];renderHabits(habits,dateStr)}
+function renderHabits(habits,today){document.getElementById('habitsList').innerHTML=habits.map(h=>{const desc=state.viewMode==='tiny'?(h.tiny||h.desc):h.desc;const checked=isCompleted(h.id,today);return'<div class="habit '+(checked?'completed':'')+'" data-id="'+h.id+'">'+'<div class="habit-top"><div class="checkbox '+(checked?'checked':'')+'" onclick="toggleHabit(\''+h.id+'\',\''+today+'\')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'+'<div class="habit-title">'+h.title+'</div><button class="info-btn" onclick="showInfo(\''+h.id+'\')">'+ICONS.info+'</button></div>'+'<div class="habit-desc">'+desc+'</div></div>'}).join('')}
+function isCompleted(id,date){return state.completed[date]?.[id]||false}
+function toggleHabit(id,date){if(!state.completed[date])state.completed[date]={};state.completed[date][id]=!state.completed[date][id];save();const el=document.querySelector('.habit[data-id="'+id+'"]');if(el){const cb=el.querySelector('.checkbox');if(state.completed[date][id]){el.classList.add('completed');cb.classList.add('checked')}else{el.classList.remove('completed');cb.classList.remove('checked')}}updateStats()}
+function showInfo(id){const all=[...CORE_HABITS.alwaysOn,...CORE_HABITS.recovery,...CORE_HABITS.training,...CORE_HABITS.performance];const h=all.find(x=>x.id===id);if(!h)return;showModal('<div class="modal-header"><div class="modal-title">'+h.title+'</div><button class="modal-close" onclick="closeModal()">'+ICONS.x+'</button></div><div style="margin-bottom:16px"><div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">What</div><div style="font-size:14px;color:var(--text-primary)">'+h.what+'</div></div><div style="margin-bottom:16px"><div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">Why</div><div style="font-size:14px;color:var(--text-primary)">'+h.why+'</div></div><div style="margin-bottom:16px"><div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">How</div><div style="font-size:14px;color:var(--text-primary)">'+h.how+'</div></div><div><div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">Safety</div><div style="font-size:14px;color:var(--text-primary)">'+h.safety+'</div></div>')}
+function addCustom(){showModal('<div class="modal-header"><div class="modal-title">Add Habit</div><button class="modal-close" onclick="closeModal()">'+ICONS.x+'</button></div><div class="input-group"><label class="input-label">Title</label><input type="text" class="input" id="newTitle" placeholder="Shoulder Rehab"></div><div class="input-group"><label class="input-label">Description</label><input type="text" class="input" id="newDesc" placeholder="10-15 min rehab"></div><button class="btn btn-primary" style="width:100%" onclick="saveCustom()">Add</button>')}
+function saveCustom(){const title=document.getElementById('newTitle').value,desc=document.getElementById('newDesc').value;if(!title){alert('Enter a title');return}const id='custom_'+Date.now();if(!CORE_HABITS.custom)CORE_HABITS.custom=[];CORE_HABITS.custom.push({id,title,desc,tiny:desc,what:title,why:'Personal goal',how:'As needed',safety:'Listen to your body',category:'always',equipment:[]});state.activeHabitIds.push(id);save();renderHabitsForDay();closeModal()}
+function viewLibrary(){const categories=[{name:'Always On',habits:CORE_HABITS.alwaysOn},{name:'Recovery',habits:CORE_HABITS.recovery},{name:'Training',habits:CORE_HABITS.training},{name:'Performance',habits:CORE_HABITS.performance}];if(CORE_HABITS.custom?.length)categories.push({name:'Custom',habits:CORE_HABITS.custom});let html='<div class="modal-header"><div class="modal-title">Habits Library</div><button class="modal-close" onclick="closeModal()">'+ICONS.x+'</button></div><div style="max-height:60vh;overflow-y:auto">';categories.forEach(cat=>{const inRoutine=cat.habits.filter(h=>state.activeHabitIds.includes(h.id));const notInRoutine=cat.habits.filter(h=>!state.activeHabitIds.includes(h.id));html+='<div class="library-category"><div class="library-category-title">'+cat.name+' ('+cat.habits.length+')</div>';inRoutine.forEach(h=>{html+='<div class="library-habit in-routine"><div class="library-habit-name">'+h.title+'</div><span class="library-habit-status active">Active</span>'+(cat.name!=='Always On'?'<button class="library-habit-btn remove" onclick="toggleLibraryHabit(\''+h.id+'\')">Remove</button>':'')+'</div>'});notInRoutine.forEach(h=>{html+='<div class="library-habit"><div class="library-habit-name">'+h.title+'</div><span class="library-habit-status inactive">Not in routine</span><button class="library-habit-btn add" onclick="toggleLibraryHabit(\''+h.id+'\')">Add</button></div>'});html+='</div>'});html+='</div>';showModal(html)}
+function toggleLibraryHabit(id){const idx=state.activeHabitIds.indexOf(id);if(idx>-1){if(CORE_HABITS.alwaysOn.find(h=>h.id===id))return;state.activeHabitIds.splice(idx,1)}else state.activeHabitIds.push(id);save();viewLibrary();renderHabitsForDay()}
+function renderSessions(){const list=document.getElementById('sessionsList');if(!state.sessions.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-muted)"><div style="margin-bottom:12px;opacity:0.4">'+ICONS.mountain+'</div><div>No sessions yet</div></div>';return}list.innerHTML=state.sessions.slice(0,10).map(s=>'<div class="session"><div class="session-header"><span class="session-date">'+new Date(s.date).toLocaleDateString()+'</span><span class="session-grade">'+s.grade+'</span></div><div class="session-details">'+s.discipline+' · '+s.duration+' min'+(s.notes?'<br>'+s.notes:'')+'</div></div>').join('')}
+function saveSessionFn(){const discipline=document.getElementById('discipline').value,grade=document.getElementById('grade').value,duration=document.getElementById('duration').value,notes=document.getElementById('notes').value;if(!grade||!duration){alert('Enter grade and duration');return}state.sessions.unshift({date:new Date().toISOString(),discipline,grade,duration:parseInt(duration),notes});['grade','duration','notes'].forEach(id=>document.getElementById(id).value='');save();renderSessions();updateStats()}
+function updateStats(){let current=0,best=0,temp=0;for(let i=0;i<state.day;i++){const d=new Date(state.startDate);d.setDate(d.getDate()+i);const ds=d.toISOString().split('T')[0];if(state.completed[ds]&&Object.values(state.completed[ds]).some(v=>v)){temp++;best=Math.max(best,temp);if(i===state.day-1)current=temp}else temp=0}document.getElementById('currentStreak').textContent=current+' days';document.getElementById('bestStreak').textContent=best+' days';document.getElementById('totalDays').textContent=state.day;document.getElementById('totalSessions').textContent=state.sessions.length}
+function updateProfilePage(){const name=state.userData?.name||'Climber';const level=state.userData?.level||'intermediate';document.getElementById('profileName').textContent=name;document.getElementById('profileLevel').textContent=level.charAt(0).toUpperCase()+level.slice(1);document.getElementById('profileNameInput').value=state.userData?.name||'';document.getElementById('profileLevelSelect').value=state.userData?.level||'intermediate';document.getElementById('profileDiscipline').value=state.userData?.discipline||'boulder';document.getElementById('profileGoal').value=state.userData?.goal||'strength'}
+function updateProfile(key,value){state.userData[key]=value;if(key==='goal'||key==='level'||key==='equipment')generateHabitsFromProfile();save();updateProfilePage();renderHabitsForDay()}
+function updateTimerDisplay(){document.getElementById('timerTime').textContent=String(Math.floor(state.timerSec/60)).padStart(2,'0')+':'+String(state.timerSec%60).padStart(2,'0')}
+let timerDelayInterval=null;
+function startTimer(){if(state.timerRunning){clearInterval(state.timerInterval);clearInterval(timerDelayInterval);state.timerRunning=false;document.getElementById('timerStart').textContent='Start';return}const duration=parseInt(document.getElementById('timerDuration').value)||30;const delay=parseInt(document.getElementById('timerDelay').value)||0;state.timerSec=duration;if(delay>0){let remaining=delay;document.getElementById('timerTime').textContent=remaining+'...';document.getElementById('timerStart').textContent='Cancel';state.timerRunning=true;timerDelayInterval=setInterval(()=>{remaining--;if(remaining>0){document.getElementById('timerTime').textContent=remaining+'...';if(remaining<=3)beep(600,0.1)}else{clearInterval(timerDelayInterval);tripleBeep();runTimer()}},1000)}else{state.timerRunning=true;runTimer()}}
+function runTimer(){document.getElementById('timerStart').textContent='Pause';updateTimerDisplay();state.timerInterval=setInterval(()=>{if(state.timerSec>0){state.timerSec--;updateTimerDisplay()}else{clearInterval(state.timerInterval);state.timerRunning=false;document.getElementById('timerStart').textContent='Start';tripleBeep()}},1000)}
+function resetTimer(){clearInterval(state.timerInterval);clearInterval(timerDelayInterval);state.timerRunning=false;state.timerSec=parseInt(document.getElementById('timerDuration').value)||30;document.getElementById('timerStart').textContent='Start';updateTimerDisplay()}
+let intervalDelayTimer=null;
+function startInterval(){const work=parseInt(document.getElementById('workSec').value),rest=parseInt(document.getElementById('restSec').value),sets=parseInt(document.getElementById('sets').value),rounds=parseInt(document.getElementById('rounds').value),delay=parseInt(document.getElementById('intervalDelay').value)||0;clearInterval(state.timerInterval);clearInterval(intervalDelayTimer);if(delay>0){let remaining=delay;document.getElementById('timerTime').textContent=remaining+'...';intervalDelayTimer=setInterval(()=>{remaining--;if(remaining>0){document.getElementById('timerTime').textContent=remaining+'...';if(remaining<=3)beep(600,0.1)}else{clearInterval(intervalDelayTimer);tripleBeep();runInterval(work,rest,sets,rounds)}},1000)}else runInterval(work,rest,sets,rounds)}
+function runInterval(work,rest,sets,rounds){let currentSet=1,currentRound=1,isWork=true;state.timerSec=work;updateTimerDisplay();state.timerInterval=setInterval(()=>{if(state.timerSec>0){state.timerSec--;updateTimerDisplay()}else{if(isWork){beep(800,0.1);state.timerSec=rest;isWork=false}else{doubleBeep();currentSet++;if(currentSet>sets){currentSet=1;currentRound++;if(currentRound>rounds){clearInterval(state.timerInterval);tripleBeep();return}}state.timerSec=work;isWork=true}updateTimerDisplay()}},1000)}
+function updateMountain(){const h=Math.min(state.day/365,1)*60;document.getElementById('m1').style.height=h+'%';document.getElementById('m2').style.height=(h*0.8)+'%';document.getElementById('m3').style.height=(h*0.6)+'%';document.getElementById('mountainBg').style.opacity=state.showMountain?0.4:0}
+function toggleMountain(){state.showMountain=!state.showMountain;updateMountain();save()}
+function switchPage(page){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));document.querySelector('[data-page="'+page+'"]').classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(page+'Page').classList.add('active');document.getElementById('header').style.display=page==='habits'?'block':'none';if(page==='profile')updateProfilePage()}
+function showModal(content){const m=document.getElementById('modal');m.innerHTML='<div class="modal-content">'+content+'</div>';m.classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='vertical-habits.json';a.click()}
+function importData(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=e=>{const reader=new FileReader();reader.onload=ev=>{if(confirm('Overwrite all data?')){state=JSON.parse(ev.target.result);save();location.reload()}};reader.readAsText(e.target.files[0])};input.click()}
+function resetData(){if(confirm('Delete ALL data?')&&confirm('Are you sure?')){localStorage.removeItem('verticalHabitsData');location.reload()}}
+function save(){localStorage.setItem('verticalHabitsData',JSON.stringify(state))}
+let dailyStep=0;
+function showDailyCheckin(){dailyStep=0;state.todayContext={};document.getElementById('dailyCheckin').classList.add('show');renderDailyCheckin()}
+function renderDailyCheckin(){const dc=document.getElementById('dailyCheckin');const name=state.userData?.name||'Climber';let html='<div class="onboarding-content">';if(dailyStep===0){html+='<div class="onboarding-title">Welcome back, '+name+'</div><div class="onboarding-subtitle">How recovered do you feel?</div>';html+='<div class="quick-options"><div class="quick-option '+(state.todayContext.recovery==='great'?'selected':'')+'" onclick="setDailyContext(\'recovery\',\'great\')"><div class="quick-option-icon">'+ICONS.muscle+'</div><div class="quick-option-label">Great</div></div><div class="quick-option '+(state.todayContext.recovery==='good'?'selected':'')+'" onclick="setDailyContext(\'recovery\',\'good\')"><div class="quick-option-icon">'+ICONS.thumbsUp+'</div><div class="quick-option-label">Good</div></div><div class="quick-option '+(state.todayContext.recovery==='tired'?'selected':'')+'" onclick="setDailyContext(\'recovery\',\'tired\')"><div class="quick-option-icon">'+ICONS.moon+'</div><div class="quick-option-label">Tired</div></div><div class="quick-option '+(state.todayContext.recovery==='sore'?'selected':'')+'" onclick="setDailyContext(\'recovery\',\'sore\')"><div class="quick-option-icon">'+ICONS.alert+'</div><div class="quick-option-label">Sore</div></div></div>';html+='<div class="onboarding-nav"><button class="btn btn-skip" onclick="skipDailyCheckin()">Skip</button><button class="btn btn-primary" onclick="nextDailyStep()">Next</button></div>'}else if(dailyStep===1){html+='<div class="onboarding-title">Today\'s Plan</div><div class="onboarding-subtitle">What are you doing today?</div>';html+='<div class="quick-options"><div class="quick-option '+(state.todayContext.activity==='climbing'?'selected':'')+'" onclick="setDailyContext(\'activity\',\'climbing\')"><div class="quick-option-icon">'+ICONS.mountain+'</div><div class="quick-option-label">Climbing</div></div><div class="quick-option '+(state.todayContext.activity==='training'?'selected':'')+'" onclick="setDailyContext(\'activity\',\'training\')"><div class="quick-option-icon">'+ICONS.dumbbell+'</div><div class="quick-option-label">Training</div></div><div class="quick-option '+(state.todayContext.activity==='rest'?'selected':'')+'" onclick="setDailyContext(\'activity\',\'rest\')"><div class="quick-option-icon">'+ICONS.sofa+'</div><div class="quick-option-label">Rest Day</div></div><div class="quick-option '+(state.todayContext.activity==='active'?'selected':'')+'" onclick="setDailyContext(\'activity\',\'active\')"><div class="quick-option-icon">'+ICONS.walking+'</div><div class="quick-option-label">Active Recovery</div></div></div>';html+='<div class="onboarding-nav"><button class="btn btn-secondary" onclick="prevDailyStep()">Back</button><button class="btn btn-primary" onclick="nextDailyStep()">Next</button></div>'}else if(dailyStep===2&&(state.todayContext.activity==='climbing'||state.todayContext.activity==='training')){html+='<div class="onboarding-title">Location & Gear</div><div class="onboarding-subtitle">Where are you training?</div>';html+='<div class="quick-options" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px"><div class="quick-option '+(state.todayContext.location==='gym'?'selected':'')+'" onclick="setDailyContext(\'location\',\'gym\')" style="padding:16px"><div class="quick-option-icon" style="margin-bottom:6px">'+ICONS.building+'</div><div class="quick-option-label">Gym</div></div><div class="quick-option '+(state.todayContext.location==='crag'?'selected':'')+'" onclick="setDailyContext(\'location\',\'crag\')" style="padding:16px"><div class="quick-option-icon" style="margin-bottom:6px">'+ICONS.tree+'</div><div class="quick-option-label">Crag</div></div><div class="quick-option '+(state.todayContext.location==='home'?'selected':'')+'" onclick="setDailyContext(\'location\',\'home\')" style="padding:16px"><div class="quick-option-icon" style="margin-bottom:6px">'+ICONS.home+'</div><div class="quick-option-label">Home</div></div></div>';html+='<div style="font-size:12px;color:var(--text-secondary);text-transform:uppercase;margin-bottom:10px;letter-spacing:0.5px">Available Equipment</div>';const equip=state.todayContext.equipment||[];html+='<div class="quick-options" style="grid-template-columns:repeat(3,1fr)"><div class="quick-option '+(equip.includes('hangboard')?'selected':'')+'" onclick="toggleEquip(\'hangboard\')" style="padding:14px"><div class="quick-option-label" style="font-size:12px">Hangboard</div></div><div class="quick-option '+(equip.includes('weights')?'selected':'')+'" onclick="toggleEquip(\'weights\')" style="padding:14px"><div class="quick-option-label" style="font-size:12px">Weights</div></div><div class="quick-option '+(equip.includes('campus')?'selected':'')+'" onclick="toggleEquip(\'campus\')" style="padding:14px"><div class="quick-option-label" style="font-size:12px">Campus</div></div><div class="quick-option '+(equip.includes('bands')?'selected':'')+'" onclick="toggleEquip(\'bands\')" style="padding:14px"><div class="quick-option-label" style="font-size:12px">Bands</div></div><div class="quick-option '+(equip.includes('foam')?'selected':'')+'" onclick="toggleEquip(\'foam\')" style="padding:14px"><div class="quick-option-label" style="font-size:12px">Foam Roller</div></div><div class="quick-option '+(equip.includes('wall')?'selected':'')+'" onclick="toggleEquip(\'wall\')" style="padding:14px"><div class="quick-option-label" style="font-size:12px">Wall</div></div></div>';html+='<div class="onboarding-nav"><button class="btn btn-secondary" onclick="prevDailyStep()">Back</button><button class="btn btn-primary" onclick="completeDailyCheckin()">Done</button></div>'}else{completeDailyCheckin();return}html+='</div>';dc.innerHTML=html}
+function setDailyContext(key,val){state.todayContext[key]=val;renderDailyCheckin()}
+function toggleEquip(eq){if(!state.todayContext.equipment)state.todayContext.equipment=[];const idx=state.todayContext.equipment.indexOf(eq);if(idx>-1)state.todayContext.equipment.splice(idx,1);else state.todayContext.equipment.push(eq);renderDailyCheckin()}
+function nextDailyStep(){dailyStep++;renderDailyCheckin()}
+function prevDailyStep(){dailyStep--;renderDailyCheckin()}
+function skipDailyCheckin(){completeDailyCheckin()}
+function completeDailyCheckin(){const today=new Date().toISOString().split('T')[0];state.lastCheckinDate=today;if(state.todayContext.activity==='rest'||state.todayContext.activity==='active'){state.dayTypes[today]='r';state.currentDayType='r'}else if(state.todayContext.activity==='climbing'){state.dayTypes[today]='p';state.currentDayType='p'}else if(state.todayContext.activity==='training'){state.dayTypes[today]='t';state.currentDayType='t'}if(state.todayContext.recovery==='sore'||state.todayContext.recovery==='tired'){state.dayTypes[today]='r';state.currentDayType='r'}save();showQuoteModal()}
+function showQuoteModal(){const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];const dc=document.getElementById('dailyCheckin');dc.innerHTML='<div class="onboarding-content" style="display:flex;flex-direction:column;justify-content:center;min-height:100vh"><div class="quote-card"><div class="quote-text">"'+q.text+'"</div><div class="quote-author">— '+q.author+'</div></div><button class="btn btn-primary" style="width:100%" onclick="finishCheckin()">Let\'s Go</button></div>'}
+function finishCheckin(){document.getElementById('dailyCheckin').classList.remove('show');showApp()}
+let obStep=0;
+function showOnboarding(){obStep=0;document.getElementById('onboarding').classList.add('show');renderOB()}
+function renderOB(){const ob=document.getElementById('onboarding'),totalSteps=1+SURVEY.length;let content='',title='',subtitle='';if(obStep===0){title='Vertical Habits';subtitle='Track stress on your body, not dates';content='<div style="text-align:center;margin:40px 0"><div style="width:80px;height:80px;margin:0 auto 20px;opacity:0.6">'+ICONS.mountain+'</div><p style="font-size:15px;color:var(--text-secondary);line-height:1.6">Smart habit tracking with R/T/P periodization for climbers.</p></div>'}else{const q=SURVEY[obStep-1];title='Question '+obStep+'/'+SURVEY.length;subtitle=q.q;if(q.type==='text')content='<div style="margin:32px 0"><input type="text" class="input" id="surveyInput" placeholder="'+q.placeholder+'" value="'+(state.userData[q.key]||'')+'" style="font-size:17px;text-align:center;padding:18px"></div>';else if(q.type==='single')content='<div class="survey-options">'+q.options.map(opt=>'<div class="survey-option '+(state.userData[q.key]===opt.val?'selected':'')+'" onclick="selectOption(\''+q.key+'\',\''+opt.val+'\')"><div class="survey-option-title">'+opt.label+'</div>'+(opt.desc?'<div class="survey-option-desc">'+opt.desc+'</div>':'')+'</div>').join('')+'</div>';else if(q.type==='multiple'){const sel=state.userData[q.key]||[];content='<div class="quick-options" style="grid-template-columns:repeat(2,1fr)">'+q.options.map(opt=>'<div class="quick-option '+(sel.includes(opt.val)?'selected':'')+'" onclick="toggleMulti(\''+q.key+'\',\''+opt.val+'\')"><div class="quick-option-label">'+opt.label+'</div></div>').join('')+'</div>'}}ob.innerHTML='<div class="onboarding-content"><div class="onboarding-title">'+title+'</div><div class="onboarding-subtitle">'+subtitle+'</div><div class="progress">'+Array(totalSteps).fill(0).map((_,i)=>'<div class="progress-dot '+(i===obStep?'active':'')+'"></div>').join('')+'</div>'+content+'<div class="onboarding-nav">'+(obStep>0?'<button class="btn btn-secondary" onclick="prevOB()">Back</button>':'')+'<button class="btn btn-primary" onclick="nextOB()">'+(obStep===totalSteps-1?'Start':'Next')+'</button></div></div>'}
+function selectOption(key,val){state.userData[key]=val;renderOB()}
+function toggleMulti(key,val){if(!state.userData[key])state.userData[key]=[];const idx=state.userData[key].indexOf(val);if(idx>-1)state.userData[key].splice(idx,1);else state.userData[key].push(val);renderOB()}
+function nextOB(){const totalSteps=1+SURVEY.length;if(obStep>0){const q=SURVEY[obStep-1];if(q.type==='text'&&document.getElementById('surveyInput')?.value)state.userData[q.key]=document.getElementById('surveyInput').value;if(q.key==='name'&&!state.userData.name){alert('Please enter your name');return}}if(obStep<totalSteps-1){obStep++;renderOB()}else completeOB()}
+function prevOB(){if(obStep>0){obStep--;renderOB()}}
+function completeOB(){state.onboarding=true;generateHabitsFromProfile();const today=new Date().toISOString().split('T')[0];state.lastCheckinDate=today;save();document.getElementById('onboarding').classList.remove('show');showApp()}
+function attachListeners(){document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('click',()=>switchPage(item.dataset.page)));document.getElementById('addHabit')?.addEventListener('click',addCustom);document.getElementById('saveSession')?.addEventListener('click',saveSessionFn);document.getElementById('timerStart')?.addEventListener('click',startTimer);document.getElementById('timerReset')?.addEventListener('click',resetTimer);document.getElementById('timerDuration')?.addEventListener('change',function(){state.timerSec=parseInt(this.value)||30;updateTimerDisplay()});document.getElementById('startInterval')?.addEventListener('click',startInterval);document.getElementById('soundToggle')?.addEventListener('click',function(){this.classList.toggle('on');state.soundEnabled=this.classList.contains('on');save()});document.getElementById('mountainToggle')?.addEventListener('click',function(){this.classList.toggle('on');toggleMountain()});document.getElementById('exportBtn')?.addEventListener('click',exportData);document.getElementById('importBtn')?.addEventListener('click',importData);document.getElementById('resetBtn')?.addEventListener('click',resetData);document.getElementById('viewLibrary')?.addEventListener('click',viewLibrary);document.querySelectorAll('.view-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');state.viewMode=btn.dataset.view;save();renderHabitsForDay()}))}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
