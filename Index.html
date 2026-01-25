@@ -81,6 +81,7 @@ body{font-family:-apple-system,system-ui,'Segoe UI',sans-serif;background:radial
 .habits.compact .check{width:26px;height:26px}
 .habits.compact .habit-desc{display:none}
 .habits.compact .habit-sched{margin-top:4px}
+.habits.compact .habit-sched.compact-sched{padding-left:46px}
 .habits.compact .sched-tag{padding:2px 6px;font-size:9px}
 @media (max-width:420px){
   .habits.compact{grid-template-columns:1fr 1fr;gap:6px}
@@ -113,6 +114,9 @@ body{font-family:-apple-system,system-ui,'Segoe UI',sans-serif;background:radial
 .habit.drag-over{border-color:var(--accent);border-style:dashed;background:var(--accent-glow)}
 
 .habit-row{display:flex;align-items:center;gap:8px}
+.habit-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.habit-right .sched-tag{margin-right:0}
+
 .drag-grip{
   width:20px;height:24px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
@@ -131,10 +135,30 @@ body{font-family:-apple-system,system-ui,'Segoe UI',sans-serif;background:radial
 .habit-edit:hover{background:var(--elev);color:var(--text)}
 .habit-desc{font-size:12px;color:var(--dim);margin-top:6px;padding-left:54px}
 .habit-sched{font-size:10px;margin-top:4px;padding-left:54px;display:flex;gap:4px;flex-wrap:wrap}
-.sched-tag{padding:2px 6px;border-radius:4px;background:var(--elev);color:var(--muted)}
-.sched-tag.r{background:rgba(52,168,118,0.12);color:var(--accent)}
-.sched-tag.t{background:rgba(59,130,246,0.12);color:#4b8df8}
-.sched-tag.p{background:rgba(234,179,8,0.12);color:#daa520}
+
+/* Badges inside habit cards (match the day-type badges in the week row) */
+.type-badge{
+  font-size:9px;
+  font-weight:700;
+  padding:2px 5px;
+  border-radius:4px;
+  line-height:1;
+}
+.type-badge.r{background:rgba(52,168,118,0.18);color:var(--accent)}
+.type-badge.t{background:rgba(59,130,246,0.18);color:#4b8df8}
+.type-badge.p{background:rgba(234,179,8,0.18);color:#daa520}
+
+/* Schedule chip for Daily / Days-of-week (shown in Normal view only) */
+.sched-badge{
+  font-size:9px;
+  font-weight:700;
+  padding:2px 6px;
+  border-radius:4px;
+  line-height:1;
+  white-space:nowrap;
+  background:var(--elev);
+  color:var(--muted);
+}
 
 .fab{position:fixed;bottom:85px;right:16px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);border:none;color:#fff;font-size:26px;cursor:pointer;z-index:50;display:none;box-shadow:0 4px 16px rgba(52,168,118,0.4);transition:all 0.2s}
 .fab:hover{transform:scale(1.05)}
@@ -1071,25 +1095,47 @@ function renderHabitCard(h){
   var done=state.completed[state.selDate]&&state.completed[state.selDate][h.id];
   var isCompact=state.view==='tiny';
   var text=isCompact?'' : (h.desc||'');
-  var schedTags='';
-  if(h.schedule==='daily')schedTags='<span class="sched-tag">Daily</span>';
-  else if(h.schedule==='types')h.types.forEach(function(t){schedTags+='<span class="sched-tag '+t+'">'+t.toUpperCase()+'</span>'});
-  else if(h.schedule==='days')schedTags='<span class="sched-tag">'+h.days.map(function(d){return DAYSFULL[d].substring(0,3)}).join(', ')+'</span>';
-  var div=document.createElement('div');
+  // Badges shown on the right side of the habit (next to the pencil)
+  // - Type badges (R/T/P) always show (normal + compact)
+  // - Schedule chips (Daily / specific days) show in Normal view only
+  var rightBadges='';
+  if(h.schedule==='types' && Array.isArray(h.types)){
+    h.types.forEach(function(t){ rightBadges+='<span class="type-badge '+t+'">'+t.toUpperCase()+'</span>'; });
+  }else if(!isCompact){
+    if(h.schedule==='daily') rightBadges='<span class="sched-badge">Daily</span>';
+    else if(h.schedule==='days' && Array.isArray(h.days)){
+      rightBadges='<span class="sched-badge">'+h.days.map(function(d){return DAYSFULL[d].substring(0,3)}).join(' ')+'</span>';
+    }
+  }
+var div=document.createElement('div');
   div.className='habit'+(done?' done':'');
   div.setAttribute('data-id',h.id);
   if(window.__lastToggle&&window.__lastToggle.date===state.selDate&&window.__lastToggle.id===h.id&&done&&(Date.now()-window.__lastToggle.ts)<1200)div.classList.add('pop');
-  var html='<div class="habit-row"><div class="drag-grip" title="Drag to reorder"><span></span><span></span><span></span></div><div class="check'+(done?' on':'')+'"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="habit-title">'+h.title+'</div><button class="habit-edit">✎</button></div>';
-  if(!isCompact){
-    html+='<div class="habit-desc">'+text+'</div><div class="habit-sched">'+schedTags+'</div>';
+  var html='<div class="habit-row"><div class="drag-grip" title="Drag to reorder"><span></span><span></span><span></span></div><div class="check'+(done?' on':'')+'"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="habit-title">'+h.title+'</div><div class="habit-right">'+rightBadges+'<button class="habit-edit">✎</button></div></div>';
+  if(isCompact){
+    // Compact mode: no descriptions or schedule text below
+  }else{
+    html+='<div class="habit-desc">'+text+'</div>';
   }
   div.innerHTML=html;
-  div.querySelector('.check').addEventListener('click',function(e){
+  var checkEl=div.querySelector('.check');
+  checkEl.addEventListener('click',function(e){
     e.stopPropagation();
     if(!state.completed[state.selDate])state.completed[state.selDate]={};
-    state.completed[state.selDate][h.id]=!state.completed[state.selDate][h.id];
+    var newDone=!state.completed[state.selDate][h.id];
+    state.completed[state.selDate][h.id]=newDone;
     window.__lastToggle={date:state.selDate,id:h.id,ts:Date.now()};
-    save();renderHabits();updateStats();
+    save();
+    // Update UI in-place to avoid flicker
+    div.classList.toggle('done',newDone);
+    checkEl.classList.toggle('on',newDone);
+    if(newDone){
+      div.classList.add('pop');
+      setTimeout(function(){div.classList.remove('pop')},420);
+    }else{
+      div.classList.remove('pop');
+    }
+    updateStats();
   });
   div.querySelector('.habit-edit').addEventListener('click',function(e){e.stopPropagation();showEditHabit(h.id)});
   return div;
